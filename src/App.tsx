@@ -13,29 +13,37 @@ import Console from "./Console";
 import { SocketManager } from "./classes/SocketManager";
 import Home from "./Home";
 
+import { IHomeData } from "./interfaces/index";
+
 const { Content, Footer } = Layout;
 
-class App extends React.Component<{}, {}> {
+interface IAppState {
+  currentRoute: string;
+  currentServer: IHomeData;
+  homeData: IHomeData[];
+}
+
+class App extends React.Component<{}, IAppState> {
 
   state = {
     currentRoute: 'Home',
-    serverId: null,
-    homeData: null,
+    currentServer: null,
+    homeData: null
   }
 
   renderHome = () => (
     <Home data={this.state.homeData} switchRoute={this.switchRoute} />
   )
 
-  switchRoute = (route?: string) => {
-    if (!route) {
-      this.setState({ currentRoute: 'Home' });
+  switchRoute = (currentServer?: IHomeData) => {
+    if (!currentServer) {
+      this.setState({ currentRoute: 'Home', currentServer: null });
     } else {
-      this.setState({ currentRoute: "Console", serverId: route });
+      this.setState({ currentRoute: "Console", currentServer });
     }
   }
 
-  renderConsole = () => <Console socket={SocketManager.socket} serverId={this.state.serverId} />
+  renderConsole = () => <Console socket={SocketManager.socket} server={this.state.currentServer} />
 
   renderRoute = () => {
     switch (this.state.currentRoute) {
@@ -49,11 +57,13 @@ class App extends React.Component<{}, {}> {
   }
 
   render() {
+    const { currentServer } = this.state;
+
     return (
       <Layout style={{ flexDirection: 'row', minHeight: '100vh' }}>
         <SideNav switchRoute={this.switchRoute} />
         <Layout className="slideRightIn40">
-          <TopNav title="Minecraft Server Console v0.1.0" textColor="white" barColor="#111" />
+          <TopNav title={ currentServer ? currentServer.name : "Minecraft Server Console v0.1.0"} textColor="white" barColor="#111" />
           <Content style={{ display:'flex', flexDirection: 'row' }}>
             {this.renderRoute()}
           </Content>

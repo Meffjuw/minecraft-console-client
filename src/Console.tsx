@@ -4,6 +4,9 @@ import * as client from "socket.io-client";
 import { Button, Input, Tabs, Icon } from "antd";
 
 import warning from "./warning.svg";
+import { IHomeData } from "./interfaces/index";
+import FormActionBarButtonControl from "./components/ActionBar/FormActionBarButtonControl";
+import ActionBar, { IActionBarElements } from "./components/ActionBar";
 
 enum Status {
   OFFLINE,
@@ -15,7 +18,7 @@ const TEXT_AREA_HEIGHT = 530;
 
 interface IConsoleProps {
   socket: client.Socket;
-  serverId: string;
+  server: IHomeData;
 }
 
 interface IConsoleState {
@@ -65,7 +68,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
   }
 
   componentDidMount() {
-    this.props.socket.emit("instance", this.props.serverId);
+    this.props.socket.emit("instance", this.props.server.id);
 
     this.props.socket.on("log", textLog => {
       this.setState({ textLog });
@@ -181,18 +184,31 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
   }
 
   render() {
-    const { textAreaHeight, textLog, commandText } = this.state;
+    const {
+      textAreaHeight,
+      textLog,
+      commandText 
+    } = this.state;
+
+    const actionBarItems: IActionBarElements = {
+      main: [
+        {
+          id: "START_SERVER_BTN",
+          enabled: true,
+          type: "ActionBarButton",
+          icon: "settings",
+          text: "Start Server"
+        }
+      ],
+      far: []
+    };
 
     return (
       <>
-        <div className="slideRightIn40" style={{ margin: 18, marginRight: 9, marginBottom: 0, padding: 24, background: '#fff', height: '100%', width: '75%' }}>
+        <div className="slideRightIn40" style={{ margin: 0, marginRight: 9, marginBottom: 0, padding: 24, paddingTop: 12, background: '#fff', height: '100%', width: '75%' }}>
           <div className="App">
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', textAlign: 'start', paddingBottom: 16 }}>
-                { this.isServerOnline() ? <Button loading={this.isServerLoading()} type="danger" onClick={this.onStop}>Stop server</Button> : <Button loading={this.isServerLoading()} type="primary" onClick={this.onStart}>Start server</Button>}
-                <Button disabled={!this.isServerOnline()} onClick={this.onSaveWorld}>Save world</Button>
-                {/* <Button onClick={this.onClick}>Restart</Button> */}
-              </div>
+              <ActionBar items={actionBarItems} />
               {/* <span style={{ width: '100%', borderBottom: 'solid 1px #eaeaea', marginBottom: 16 }} /> */}
               <div style={{ height: textAreaHeight, overflow: "hidden", transition: 'all 0.3s' }}>
                 <Input.TextArea ref={this.setRef} rows={24} value={textLog} />

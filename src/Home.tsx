@@ -1,38 +1,23 @@
 import * as React from 'react';
 
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
-
-export interface IDashboardItem {
-  name: string;
-  label: string;
-  desc: string;
-  icon: string;
-}
-
-interface IHomeData {
-  id: string;
-  name: string;
-  desc: string;
-  version: string;
-  isForge: boolean;
-  forgeVersion: string;
-}
+import { IHomeData } from './interfaces/index';
 
 interface IHomeProps {
   data: IHomeData[];
-  switchRoute: Function;
+  switchRoute: (_server: IHomeData) => void;
 }
 
 class Home extends React.Component<IHomeProps> {
   public delay: number = 0;
 
-  onClick = (id: string) => {
-    this.props.switchRoute(id);
+  onClick = (_server: IHomeData) => {
+    this.props.switchRoute(_server);
   }
 
   renderItems = () => {
     return this.props.data && this.props.data.map(item =>
-      <div key={`dash-${item.name}`} className="slideRightIn40 DashboardItem" style={{ animationDelay: `${this.delay++ * 0.10}s`}} onClick={() => this.onClick(item.id)}>
+      <div key={`dash-${item.name}`} className="slideRightIn40 DashboardItem" style={{ animationDelay: `${this.delay++ * 0.10}s`}} onClick={() => this.onClick(item)}>
         <div style={{ flex: 1, textAlign: 'center', verticalAlign: 'center', paddingLeft: 8, paddingTop: 22 }}>
           <Icon iconName={item.isForge ? "Processing" : "AutoFillTemplate"} styles={{ root: { fontSize: 60 } }} />
         </div>

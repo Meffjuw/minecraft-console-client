@@ -14,8 +14,6 @@
     "antd": "^3.10.2",
     "connected-react-router": "^4.3.0",
     "css-loader": "^1.0.0",
-    "electron": "^2.0.7",
-    "electron-forge": "^5.2.2",
     "jsondiffpatch": "^0.3.11",
     "less": "^3.8.0",
     "less-loader": "^4.1.0",
@@ -38,7 +36,6 @@
     "typesafe-actions": "^2.0.4"
   },
   "devDependencies": {
-    "@types/electron-devtools-installer": "^2.2.0",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
     "@types/react-hot-loader": "^4.1.0",
@@ -49,8 +46,6 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "compression-webpack-plugin": "^1.1.11",
-    "electron-devtools-installer": "^2.2.4",
-    "electron-prebuilt-compile": "2.0.7",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
