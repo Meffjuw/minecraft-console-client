@@ -19,6 +19,7 @@ const TEXT_AREA_HEIGHT = 530;
 interface IConsoleProps {
   socket: client.Socket;
   server: IHomeData;
+  switchRoute: (route?: IHomeData) => void;
 }
 
 interface IConsoleState {
@@ -155,6 +156,10 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     return this.state.serverStatus === Status.LOADING;
   }
 
+  goHome = () => {
+    this.props.switchRoute();
+  }
+
   renderDetails = () => {
     const { pingData, pingLoading } = this.state;
 
@@ -196,21 +201,33 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
           id: "START_SERVER_BTN",
           enabled: true,
           type: "ActionBarButton",
-          icon: "settings",
-          text: "Start Server"
+          icon: "CheckMark",
+          text: "Start server"
+        }, {
+          id: "SAVE_WORLD_BTN",
+          enabled: true,
+          type: "ActionBarButton",
+          icon: "Save",
+          text: "Save world"
         }
       ],
-      far: []
+      far: [
+        {
+          id: "CLOSE_BUTTON",
+          icon: "Cancel",
+          type: "ActionBarFarButton",
+          onClick: this.goHome
+        }
+      ]
     };
 
     return (
-      <>
-        <div className="slideRightIn40" style={{ margin: 0, marginRight: 9, marginBottom: 0, padding: 24, paddingTop: 12, background: '#fff', height: '100%', width: '75%' }}>
-          <div className="App">
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-              <ActionBar items={actionBarItems} />
-              {/* <span style={{ width: '100%', borderBottom: 'solid 1px #eaeaea', marginBottom: 16 }} /> */}
-              <div style={{ height: textAreaHeight, overflow: "hidden", transition: 'all 0.3s' }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+        <ActionBar items={actionBarItems} />
+        <div style={{ display: "flex", flexDirection: "row", width: "100%", height: "100%" }}>
+          <div className="slideRightIn40" style={{ marginBottom: 0, padding: 24, paddingTop: 24, background: '#fff', height: '100%', width: '75%' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', height: "100%" }}>
+              <div style={{ height: "100%", overflow: "hidden", transition: 'all 0.3s' }}>
                 <Input.TextArea ref={this.setRef} rows={24} value={textLog} />
               </div>
               <div style={{ transition: 'all 0.3s', display: 'flex', flexDirection:'row' }}>
@@ -218,15 +235,15 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
               </div>
             </div>
           </div>
+          <div className="slideRightIn40" style={{ width: '25%', borderLeft: "solid 1px #eaeaea", padding: 24, paddingTop: 8, background: '#fff', minHeight: 360 }}>
+          {
+            this.isServerOnline()
+            ? this.renderDetails()
+            : this.renderServerOffline()
+          }              
+          </div>
         </div>
-        <div className="slideRightIn40" style={{ width: '25%', margin: 18, marginLeft: 9, marginBottom: 12, padding: 24, paddingTop: 8, background: '#fff', minHeight: 360 }}>
-        {
-          this.isServerOnline()
-          ? this.renderDetails()
-          : this.renderServerOffline()
-        }              
-        </div>
-      </>
+      </div>
     )
   }
 }

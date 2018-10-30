@@ -43,7 +43,7 @@ class App extends React.Component<{}, IAppState> {
     }
   }
 
-  renderConsole = () => <Console socket={SocketManager.socket} server={this.state.currentServer} />
+  renderConsole = () => <Console socket={SocketManager.socket} server={this.state.currentServer} switchRoute={this.switchRoute} />
 
   renderRoute = () => {
     switch (this.state.currentRoute) {

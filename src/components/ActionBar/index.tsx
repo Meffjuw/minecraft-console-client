@@ -216,7 +216,7 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
   renderRightElements = () => (
     <>
       <span style={{ flex: 'auto' }} />
-      {this.props.items.far.map((element) => <FormActionBarButtonControl controlId={(element as IActionBarButton).id} icon={(element as IActionBarButton).icon} /> )}
+      {this.props.items.far.map((element) => <FormActionBarButtonControl controlId={(element as IActionBarButton).id} icon={(element as IActionBarButton).icon} onClick={(element as IActionBarButton).onClick ? (element as IActionBarButton).onClick : null } /> )}
     </>
   )
 
