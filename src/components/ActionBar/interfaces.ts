@@ -2,6 +2,7 @@ export interface IActionBarButtonBase {
   id: string;
   enabled: boolean;
   text: string;
+  loading?: boolean;
 }
 
 export interface IActionBarButton extends IActionBarButtonBase {

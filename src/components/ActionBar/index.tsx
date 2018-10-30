@@ -23,6 +23,7 @@ import {
 import { Label } from "office-ui-fabric-react/lib/Label";
 import FormActionBarButtonControl from "./FormActionBarButtonControl";
 import { Button } from "antd";
+import FormActionBarButtonControlAntd from "./FormActionBarButtonControlAntd";
 
 interface IActionBarProps {
   items: IActionBarElements;
@@ -166,10 +167,10 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
     return items.main.map((element, index): JSX.Element => {
       switch(element.type) {
         case "ActionBarButton" : {
-          return <FormActionBarButtonControl controlId={element.id} icon={element.icon} text={element.text} />
+          return <FormActionBarButtonControl key={element.id} controlId={element.id} icon={element.icon} text={element.text} onClick={element.onClick} />
         }
         case "ActionBarMenuItemButton" : {
-          return <FormActionBarButtonControl controlId={element.id} icon={element.icon} text={element.text} />
+          return <FormActionBarButtonControl key={element.id} controlId={element.id} icon={element.icon} text={element.text} />
         }
         case "ActionBarDivider" : return (
           <span key={index} style={{ borderRight: `solid 1px rgba(244,244,244,0.5)`, marginTop: 8, marginBottom: 8 }} />
@@ -186,18 +187,25 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
     });
   }
 
-  renderElementsAntd = (items: IActionBarElements) => {
+  renderRightElements = () => (
+    <>
+      <span style={{ flex: 'auto' }} />
+      {this.props.items.far.map((element) => <FormActionBarButtonControl key={(element as IActionBarButton).id} controlId={(element as IActionBarButton).id} icon={(element as IActionBarButton).icon} onClick={(element as IActionBarButton).onClick ? (element as IActionBarButton).onClick : null } /> )}
+    </>
+  )
+
+  renderAntdElements = (items: IActionBarElements) => {
     return items.main.map((element, index): JSX.Element => {
       switch(element.type) {
-        // case "ActionBarButton" : {
-        //   return <FormActionBarButtonControl formId={this.props.formId} controlId={element.id} icon={element.icon} text={element.text} />
-        // }
+        case "ActionBarButton" : {
+          return <FormActionBarButtonControlAntd loading={element.loading} key={element.id} controlId={element.id} icon={element.icon} text={element.text} onClick={element.onClick} />
+        }
         // case "ActionBarMenuItemButton" : {
-        //   return <FormActionBarButtonControl formId={this.props.formId} controlId={element.id} icon={element.icon} text={element.text} />
+        //   return <FormActionBarButtonControl key={element.id} controlId={element.id} icon={element.icon} text={element.text} />
         // }
-        case "ActionBarDivider" : return (
-          <span key={index} style={{ borderRight: `solid 1px rgba(24, 144, 255, 0.4)`, marginTop: 10, marginBottom: 10 }} />
-        )
+        // case "ActionBarDivider" : return (
+        //   <span key={index} style={{ borderRight: `solid 1px rgba(244,244,244,0.5)`, marginTop: 8, marginBottom: 8 }} />
+        // )
         // case "ActionBarTabButton" : return (
         //   <CommandBarButton
         //     key={index}
@@ -206,27 +214,21 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
         //     styles={this.state.currentTab === element.text ? activeButtonStyles : buttonStyles} 
         //   />
         // )
-        default: return (
-          <div style={{paddingTop: 2, paddingBottom: 2, paddingRight: 6, paddingLeft: 6}}><Button type={(element as IActionBarButton).primary ? 'primary' : 'default'} icon={(element as IActionBarButton).icon}>{(element as IActionBarButton).text}</Button></div>
-        )
       }
     });
   }
-
-  renderRightElements = () => (
-    <>
-      <span style={{ flex: 'auto' }} />
-      {this.props.items.far.map((element) => <FormActionBarButtonControl controlId={(element as IActionBarButton).id} icon={(element as IActionBarButton).icon} onClick={(element as IActionBarButton).onClick ? (element as IActionBarButton).onClick : null } /> )}
-    </>
-  )
 
   render() {
     this.count = 0;
     
     return (
       <div>
-        <div className="slideRightIn40" style={rootStyle}>
+        {/* <div className="slideRightIn40" style={rootStyle}>
           {this.renderElements(this.props.items)}
+          {this.renderRightElements()}
+        </div> */}
+        <div className="slideRightIn40" style={rootStyle}>
+          {this.renderAntdElements(this.props.items)}
           {this.renderRightElements()}
         </div>
         {this.renderRibbon()}

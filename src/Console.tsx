@@ -1,11 +1,11 @@
 import * as React from "react";
 import * as client from "socket.io-client";
 
-import { Button, Input, Tabs, Icon } from "antd";
+import { Input, Tabs, Icon } from "antd";
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 
 import warning from "./warning.svg";
 import { IHomeData } from "./interfaces/index";
-import FormActionBarButtonControl from "./components/ActionBar/FormActionBarButtonControl";
 import ActionBar, { IActionBarElements } from "./components/ActionBar";
 
 enum Status {
@@ -14,8 +14,6 @@ enum Status {
   ONLINE
 }
 
-const TEXT_AREA_HEIGHT = 530;
-
 interface IConsoleProps {
   socket: client.Socket;
   server: IHomeData;
@@ -23,7 +21,6 @@ interface IConsoleProps {
 }
 
 interface IConsoleState {
-  textAreaHeight: number;
   collapsed: boolean;
   serverStatus: Status,
   pingLoading: boolean,
@@ -42,13 +39,14 @@ interface IConsoleState {
   },
   textLog: string,
   commandText: string,
+  showPropsPanel: boolean;
+  properties: any;
 }
 
 class Console extends React.Component<IConsoleProps, IConsoleState> {
   private textArea: any;
 
   state = {
-    textAreaHeight: TEXT_AREA_HEIGHT,
     collapsed: true,
     serverStatus: Status.OFFLINE,
     pingLoading: true,
@@ -66,8 +64,11 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     },
     textLog: "",
     commandText: "",
+    showPropsPanel: false,
+    properties: null
   }
 
+  // Lifecycle functions
   componentDidMount() {
     this.props.socket.emit("instance", this.props.server.id);
 
@@ -79,16 +80,26 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
       }
     });
 
-    this.props.socket.on("console", data => {
-      this.setState({ textLog: this.state.textLog + data });
+    this.props.socket.on("console", payload => {
+      if (payload.serverId === this.props.server.id) {
+        this.setState({ textLog: this.state.textLog + payload.msg });
 
-      if (this.textArea) {
-        this.textArea.scrollTop = this.textArea.scrollHeight;
+        if (this.textArea) {
+          this.textArea.scrollTop = this.textArea.scrollHeight;
+        }
       }
     });
 
-    this.props.socket.on("status", status => {
-      this.setState({ serverStatus: status });
+    this.props.socket.on("status", payload => {
+      if (payload.serverId === this.props.server.id) {
+        this.setState({ serverStatus: payload.status });
+      }
+    });
+
+    this.props.socket.on("PROPS_DETAILS", payload => {
+      if (payload.serverId === this.props.server.id) {
+        this.setState({ showPropsPanel: true, properties: payload.props });
+      }
     })
 
     this.props.socket.on("ping", pingData => {
@@ -103,27 +114,45 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     this.textArea = null;
   }
 
+  // Server command functions
   onStart = () => {
     if (this.props.socket.connected) {
-      this.props.socket.emit("START_SERVER");
+      this.props.socket.emit("START_SERVER", this.props.server.id);
     }
-    
   }
 
   onStop = () => {
-    this.props.socket.emit("STOP_SERVER");
-  }
-
-  onClick = () => {
-    this.setState({ pingLoading: !this.state.pingLoading });
+    this.props.socket.emit("STOP_SERVER", this.props.server.id);
   }
 
   onSaveWorld = () => {
-    this.props.socket.emit("SAVE_WORLD");
+    this.props.socket.emit("SAVE_WORLD", this.props.server.id);
   }
 
-  onCollapse = () => {
-    this.setState({ collapsed: !this.state.collapsed });
+  onCommandSend = () => {
+    this.props.socket.emit("COMMAND", { 
+      serverId: this.props.server.id,
+      command: this.state.commandText
+    });
+
+    this.setState({ commandText: "" });
+  }
+
+  onProperties = () => {
+    this.props.socket.emit("PROPS", this.props.server.id);
+  }
+
+  // Component functions
+  isServerOnline = (): boolean => {
+    return this.state.serverStatus === Status.ONLINE;
+  }
+
+  isServerLoading = (): boolean => {
+    return this.state.serverStatus === Status.LOADING;
+  }
+
+  goHome = () => {
+    this.props.switchRoute();
   }
 
   setRef = (element) => {
@@ -136,29 +165,13 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     this.setState({ commandText: event.target.value });
   }
 
-  onCommandSend = () => {
-    this.props.socket.emit("COMMAND", this.state.commandText);
-    this.setState({ commandText: "" });
-  }
-
+  // Render functions
   renderServerOffline = () => (
     <div style={{ height: '100%', width: '100%', display:'flex', flexDirection:'column', textAlign:'center', justifyContent:'center' }} className="slideRightIn40">
       <img src={warning} style={{ height: 120, opacity: 0.25 }} />
       <p style={{ fontFamily: 'Roboto' }}>Server is offline. </p>
     </div>
   );
-
-  isServerOnline = (): boolean => {
-    return this.state.serverStatus === Status.ONLINE;
-  }
-
-  isServerLoading = (): boolean => {
-    return this.state.serverStatus === Status.LOADING;
-  }
-
-  goHome = () => {
-    this.props.switchRoute();
-  }
 
   renderDetails = () => {
     const { pingData, pingLoading } = this.state;
@@ -188,27 +201,48 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     }
   }
 
+  renderProperties = () => {
+    return (
+      <div>
+        {this.state.properties.map(prop => {
+          switch(typeof(prop)) {
+            
+          }
+        })}
+      </div>
+    )
+  }
+
   render() {
     const {
-      textAreaHeight,
       textLog,
-      commandText 
+      commandText,
+      serverStatus
     } = this.state;
 
     const actionBarItems: IActionBarElements = {
       main: [
         {
-          id: "START_SERVER_BTN",
+          id: "START_STOP_SERVER_BTN",
           enabled: true,
           type: "ActionBarButton",
-          icon: "CheckMark",
-          text: "Start server"
+          icon: serverStatus ? "stop" : "caret-right",
+          text: serverStatus ? "Stop server" : "Start server",
+          onClick: serverStatus ? this.onStop : this.onStart,
+          loading: this.isServerLoading()
         }, {
           id: "SAVE_WORLD_BTN",
           enabled: true,
           type: "ActionBarButton",
-          icon: "Save",
+          icon: "save",
           text: "Save world"
+        }, {
+          id: "PROPS_BTN",
+          enabled: true,
+          type: "ActionBarButton",
+          icon: "form",
+          text: "Properties",
+          onClick: this.onProperties
         }
       ],
       far: [
@@ -222,7 +256,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     };
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <div className="custom" style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         <ActionBar items={actionBarItems} />
         <div style={{ display: "flex", flexDirection: "row", width: "100%", height: "100%" }}>
           <div className="slideRightIn40" style={{ marginBottom: 0, padding: 24, paddingTop: 24, background: '#fff', height: '100%', width: '75%' }}>
@@ -243,6 +277,14 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
           }              
           </div>
         </div>
+        <Panel
+          isOpen={this.state.showPropsPanel}
+          onDismiss={null}
+          type={PanelType.medium}
+          headerText="Properties"
+        >
+          { this.state.showPropsPanel ? this.renderProperties() : null }
+        </Panel>
       </div>
     )
   }
