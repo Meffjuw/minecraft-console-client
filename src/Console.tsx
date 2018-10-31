@@ -3,10 +3,14 @@ import * as client from "socket.io-client";
 
 import { Input, Tabs, Icon } from "antd";
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
+import { TextField } from 'office-ui-fabric-react/lib/TextField'
+import { titleCase } from "change-case";
 
 import warning from "./warning.svg";
 import { IHomeData } from "./interfaces/index";
 import ActionBar, { IActionBarElements } from "./components/ActionBar";
+import { PrimaryButton, DefaultButton } from "office-ui-fabric-react/lib/Button";
 
 enum Status {
   OFFLINE,
@@ -202,15 +206,31 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
   }
 
   renderProperties = () => {
-    return (
-      <div>
-        {this.state.properties.map(prop => {
-          switch(typeof(prop)) {
-            
-          }
-        })}
-      </div>
-    )
+    const { properties } = this.state;
+
+    return Object.keys(properties).map(propKey => {
+      switch(typeof(properties[propKey])) {
+        case "boolean" : return ( 
+          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+            <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
+            <span style={{ width: "40%"}}> <Toggle checked={properties[propKey]}/></span>
+          </span>
+          );
+        case "string" : return ( 
+          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+            <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]}/></span>
+          </span>
+        );
+        case "number" : return ( 
+          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+            <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]}/></span>
+          </span>
+        );
+        default: return null;
+      }
+    })
   }
 
   render() {
@@ -230,6 +250,8 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
           text: serverStatus ? "Stop server" : "Start server",
           onClick: serverStatus ? this.onStop : this.onStart,
           loading: this.isServerLoading()
+        }, {
+          type: "ActionBarDivider"
         }, {
           id: "SAVE_WORLD_BTN",
           enabled: true,
@@ -279,11 +301,23 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
         </div>
         <Panel
           isOpen={this.state.showPropsPanel}
-          onDismiss={null}
-          type={PanelType.medium}
+          isLightDismiss={true}
+          type={PanelType.custom}
+          customWidth="600px"
           headerText="Properties"
         >
-          { this.state.showPropsPanel ? this.renderProperties() : null }
+          { 
+            this.state.showPropsPanel 
+            ? <div style={{ display:"flex", flexDirection: 'column'}}>
+                {this.renderProperties()}
+                <div style={{ display: 'flex', width: "100%", paddingTop: 12 }}>
+                  <PrimaryButton text="Save" />
+                  <span style={{ paddingLeft: 12 }} />
+                  <DefaultButton text="Cancel" />
+                </div>
+              </div>
+            : null 
+          }
         </Panel>
       </div>
     )

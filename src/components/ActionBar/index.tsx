@@ -203,9 +203,9 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
         // case "ActionBarMenuItemButton" : {
         //   return <FormActionBarButtonControl key={element.id} controlId={element.id} icon={element.icon} text={element.text} />
         // }
-        // case "ActionBarDivider" : return (
-        //   <span key={index} style={{ borderRight: `solid 1px rgba(244,244,244,0.5)`, marginTop: 8, marginBottom: 8 }} />
-        // )
+        case "ActionBarDivider" : return (
+          <span key={index} style={{ borderRight: `solid 1px rgba(244,244,244,0.5)`, marginTop: 8, marginBottom: 8 }} />
+        )
         // case "ActionBarTabButton" : return (
         //   <CommandBarButton
         //     key={index}
