@@ -9,6 +9,7 @@ interface IFormActionBarButtonControlProps {
   text?: string;
   onClick?: Function;
   loading: boolean;
+  enabled: boolean;
 }
 
 class FormActionBarButtonControlAntd extends React.Component<IFormActionBarButtonControlProps> {
@@ -29,10 +30,19 @@ class FormActionBarButtonControlAntd extends React.Component<IFormActionBarButto
   }
 
   render() {
-    const { icon, text, loading } = this.props;
+    const { icon, text, loading, enabled } = this.props;
 
     return (
-      <Button key={this.props.controlId} onClick={this.onClick} icon={icon} loading={loading} style={{ paddingLeft: loading ? 29 : 12, paddingRight: 12 }}>{text}</Button>
+      <Button
+        disabled={!enabled}
+        key={this.props.controlId}
+        onClick={this.onClick} 
+        icon={icon}
+        loading={loading}
+        style={{ paddingLeft: loading ? 29 : 12, paddingRight: 12 }}
+      >
+        {text}
+      </Button>
     )
   }
 }

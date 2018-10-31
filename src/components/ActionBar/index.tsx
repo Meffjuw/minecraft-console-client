@@ -198,7 +198,7 @@ class ActionBar extends React.Component<IActionBarProps, IActionBarState> {
     return items.main.map((element, index): JSX.Element => {
       switch(element.type) {
         case "ActionBarButton" : {
-          return <FormActionBarButtonControlAntd loading={element.loading} key={element.id} controlId={element.id} icon={element.icon} text={element.text} onClick={element.onClick} />
+          return <FormActionBarButtonControlAntd enabled={element.enabled} loading={element.loading} key={element.id} controlId={element.id} icon={element.icon} text={element.text} onClick={element.onClick} />
         }
         // case "ActionBarMenuItemButton" : {
         //   return <FormActionBarButtonControl key={element.id} controlId={element.id} icon={element.icon} text={element.text} />

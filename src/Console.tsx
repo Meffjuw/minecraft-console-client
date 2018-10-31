@@ -178,12 +178,12 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     }})
   }
 
-  onPropertyTextChange = (propKey: string, value: string) => {
+  onPropertyTextChange = (propKey: string, value: string, type: string) => {
     const { properties } = this.state;
 
     this.setState({ properties: {
       ...properties,
-      [propKey]: value
+      [propKey]: type === "number" ? parseInt(value) : value
     }})
   }
 
@@ -245,13 +245,13 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
         case "string" : return ( 
           <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
             <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value, "string")} /></span>
           </span>
         );
         case "number" : return ( 
           <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
             <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value, "number")} /></span>
           </span>
         );
         case "object" : {
@@ -259,7 +259,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
             return (
               <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
                 <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-                <span style={{ width: "40%"}}><TextField value={properties[propKey] ? properties[propKey] : "" } onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
+                <span style={{ width: "40%"}}><TextField value={properties[propKey] ? properties[propKey] : "" } onChange={(event, value) => this.onPropertyTextChange(propKey, value, "string")} /></span>
               </span>
             )
           }
@@ -290,10 +290,11 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
           type: "ActionBarDivider"
         }, {
           id: "SAVE_WORLD_BTN",
-          enabled: true,
+          enabled: this.isServerOnline(),
           type: "ActionBarButton",
           icon: "save",
-          text: "Save world"
+          text: "Save world",
+          onClick: this.onSaveWorld
         }, {
           id: "PROPS_BTN",
           enabled: true,
@@ -320,7 +321,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
           <div className="slideRightIn40" style={{ marginBottom: 0, padding: 24, paddingTop: 24, background: '#fff', height: '100%', width: '75%' }}>
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', height: "100%" }}>
               <div style={{ height: "100%", overflow: "hidden", transition: 'all 0.3s' }}>
-                <Input.TextArea ref={this.setRef} rows={24} value={textLog} />
+                <Input.TextArea ref={this.setRef} rows={24} value={textLog} spellCheck={false} />
               </div>
               <div style={{ transition: 'all 0.3s', display: 'flex', flexDirection:'row', marginTop: 24 }}>
                 <Input disabled={!this.isServerOnline()} value={commandText} onChange={this.onCommandTextChange} onPressEnter={this.onCommandSend}/>
