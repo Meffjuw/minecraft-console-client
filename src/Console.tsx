@@ -169,6 +169,32 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     this.setState({ commandText: event.target.value });
   }
 
+  onPropertyToggleChange = (propKey: string, checked: boolean) => {
+    const { properties } = this.state;
+
+    this.setState({ properties: {
+      ...properties,
+      [propKey]: checked
+    }})
+  }
+
+  onPropertyTextChange = (propKey: string, value: string) => {
+    const { properties } = this.state;
+
+    this.setState({ properties: {
+      ...properties,
+      [propKey]: value
+    }})
+  }
+
+  onPropertiesSave = () => {
+    console.log(JSON.stringify(this.state.properties, null, 2));
+  }
+
+  closePropertiesPanel = () => {
+    this.setState({ showPropsPanel: false });
+  }
+
   // Render functions
   renderServerOffline = () => (
     <div style={{ height: '100%', width: '100%', display:'flex', flexDirection:'column', textAlign:'center', justifyContent:'center' }} className="slideRightIn40">
@@ -211,23 +237,33 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
     return Object.keys(properties).map(propKey => {
       switch(typeof(properties[propKey])) {
         case "boolean" : return ( 
-          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+          <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
             <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-            <span style={{ width: "40%"}}> <Toggle checked={properties[propKey]}/></span>
+            <span style={{ width: "40%"}}> <Toggle key={propKey} onChange={(event, value) => this.onPropertyToggleChange(propKey, value)} checked={properties[propKey]}/></span>
           </span>
           );
         case "string" : return ( 
-          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+          <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
             <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-            <span style={{ width: "40%"}}><TextField value={properties[propKey]}/></span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
           </span>
         );
         case "number" : return ( 
-          <span style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+          <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
             <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
-            <span style={{ width: "40%"}}><TextField value={properties[propKey]}/></span>
+            <span style={{ width: "40%"}}><TextField value={properties[propKey]} onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
           </span>
         );
+        case "object" : {
+          if (!properties[propKey]) {
+            return (
+              <span key={propKey} style={{display: 'flex', flexDirection:'row', padding: 4 }}>
+                <span style={{ width: "60%"}}>{titleCase(propKey)}</span>
+                <span style={{ width: "40%"}}><TextField value={properties[propKey] ? properties[propKey] : "" } onChange={(event, value) => this.onPropertyTextChange(propKey, value)} /></span>
+              </span>
+            )
+          }
+        }
         default: return null;
       }
     })
@@ -286,7 +322,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
               <div style={{ height: "100%", overflow: "hidden", transition: 'all 0.3s' }}>
                 <Input.TextArea ref={this.setRef} rows={24} value={textLog} />
               </div>
-              <div style={{ transition: 'all 0.3s', display: 'flex', flexDirection:'row' }}>
+              <div style={{ transition: 'all 0.3s', display: 'flex', flexDirection:'row', marginTop: 24 }}>
                 <Input disabled={!this.isServerOnline()} value={commandText} onChange={this.onCommandTextChange} onPressEnter={this.onCommandSend}/>
               </div>
             </div>
@@ -301,6 +337,7 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
         </div>
         <Panel
           isOpen={this.state.showPropsPanel}
+          onDismiss={this.closePropertiesPanel}
           isLightDismiss={true}
           type={PanelType.custom}
           customWidth="600px"
@@ -310,10 +347,10 @@ class Console extends React.Component<IConsoleProps, IConsoleState> {
             this.state.showPropsPanel 
             ? <div style={{ display:"flex", flexDirection: 'column'}}>
                 {this.renderProperties()}
-                <div style={{ display: 'flex', width: "100%", paddingTop: 12 }}>
-                  <PrimaryButton text="Save" />
-                  <span style={{ paddingLeft: 12 }} />
-                  <DefaultButton text="Cancel" />
+                <div style={{ display: 'flex', width: "100%", paddingTop: 24, justifyContent: "flex-end" }}>
+                  <PrimaryButton text="Save" onClick={this.onPropertiesSave} />
+                  <span style={{ paddingLeft: 8 }} />
+                  <DefaultButton text="Cancel" onClick={this.closePropertiesPanel} />
                 </div>
               </div>
             : null 
